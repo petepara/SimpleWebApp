@@ -1,6 +1,5 @@
 package com.mastery.java.task.service;
 
-import com.mastery.java.task.config.entity.EmployeeEntity;
 import com.mastery.java.task.dto.Employee;
 
 import java.util.List;
@@ -10,11 +9,11 @@ public interface EmployeeService {
 
     List<Employee> findAll();
 
-    EmployeeEntity addEmployee(EmployeeEntity employeeEntity);
+    Employee addEmployee(Employee employee);
 
-    void deleteEmployee(int id);
+    void deleteEmployee(long id);
 
-    void updateInfoAboutEmployee(EmployeeEntity employeeEntity);
+    Employee updateInfoAboutEmployee(Employee employee);
 
-    Optional<Employee> findById(int id);
+    Optional<Employee> findById(long id);
 }

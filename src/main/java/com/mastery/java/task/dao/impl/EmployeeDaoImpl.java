@@ -1,6 +1,5 @@
 package com.mastery.java.task.dao.impl;
 
-import com.mastery.java.task.config.entity.EmployeeEntity;
 import com.mastery.java.task.dao.EmployeeDao;
 import com.mastery.java.task.dto.Employee;
 import com.mastery.java.task.mapper.EmployeeMapper;
@@ -21,71 +20,61 @@ import java.util.Optional;
 
 @Repository
 public class EmployeeDaoImpl implements EmployeeDao {
-
-    private final JdbcTemplate jdbcTemplate;
-
     @Autowired
-    public EmployeeDaoImpl(JdbcTemplate jdbcTemplate) {
-        this.jdbcTemplate = jdbcTemplate;
-    }
+    private JdbcTemplate jdbcTemplate;
+    private final String FIND_ALL_EMPLOYEES_SQL = "SELECT * FROM employee";
+    private final String ADD_EMPLOYEE_SQL = "INSERT INTO employee (first_name, last_name, department_id, job_title, gender, date_of_birth)" +
+            " VALUES (?,?,?,?,cast (? as gender),?)";
+    private final String DELETE_EMPLOYEE_SQL = "DELETE FROM employee WHERE employee_id=?";
+    private final String UPDATE_EMPLOYEE_SQL = "UPDATE employee SET first_name=?, last_name=?, department_id=?, job_title=?, gender=cast (? as gender), date_of_birth=?" +
+            " WHERE employee_id=?";
+    private final String FIND_EMPLOYEE_BY_ID_SQL = "SELECT * FROM employee WHERE employee_id = ?";
 
     @Override
-    public List<EmployeeEntity> findAll() {
-        String findAllSql =
-                "SELECT * FROM employee";
-        return jdbcTemplate.query(findAllSql, new EmployeeMapper());
+    public List<Employee> findAll() {
+        return jdbcTemplate.query(FIND_ALL_EMPLOYEES_SQL, new EmployeeMapper());
     }
 
     @Override
     @SneakyThrows
-    public EmployeeEntity addEmployee(EmployeeEntity employeeEntity) {
-        String addEmployeeSql =
-                "INSERT INTO employee (first_name, last_name, department_id, job_title, gender, date_of_birth) VALUES (?,?,?,?,cast (? as gender),?)";
+    public Employee addEmployee(Employee employee) {
+
         KeyHolder keyHolder = new GeneratedKeyHolder();
 
-        jdbcTemplate.update(new PreparedStatementCreator() {
-            @Override
-            public PreparedStatement createPreparedStatement(Connection connection) throws SQLException {
-                PreparedStatement ps = connection.prepareStatement(addEmployeeSql, new String[]{"employee_id"});
-                ps.setString(1, employeeEntity.getFirstName());
-                ps.setString(2, employeeEntity.getLastName());
-                ps.setInt(3, employeeEntity.getDepartmentId());
-                ps.setString(4, employeeEntity.getJobTitle());
-                ps.setObject(5, employeeEntity.getGender().name());
-                ps.setDate(6, Date.valueOf(employeeEntity.getDateOfBirth()));
-                return ps;
-            }
+        jdbcTemplate.update(connection -> {
+            PreparedStatement ps = connection.prepareStatement(ADD_EMPLOYEE_SQL, new String[]{"employee_id"});
+            ps.setString(1, employee.getFirstName());
+            ps.setString(2, employee.getLastName());
+            ps.setInt(3, employee.getDepartmentId());
+            ps.setString(4, employee.getJobTitle());
+            ps.setObject(5, employee.getGender().name());
+            ps.setDate(6, Date.valueOf(employee.getDateOfBirth()));
+            return ps;
         }, keyHolder);
-        employeeEntity.setEmployeeId(keyHolder.getKey().intValue());
-        return employeeEntity;
+        employee.setEmployeeId(keyHolder.getKey().longValue());
+        return employee;
     }
 
     @Override
-    public void deleteEmployee(int id) {
-        String deleteEmployeeSql =
-                "DELETE FROM employee WHERE employee_id=?";
-        jdbcTemplate.update(deleteEmployeeSql, id);
+    public void deleteEmployee(long id) {
+        jdbcTemplate.update(DELETE_EMPLOYEE_SQL, id);
     }
 
     @Override
-    public void updateInfoAboutEmployee(EmployeeEntity employeeEntity) {
-        String updateUserSql =
-                "UPDATE employee SET first_name=?, last_name=?, department_id=?, job_title=?, gender=?, date_of_birth=? WHERE employee_id=?";
-        jdbcTemplate.update(updateUserSql, employeeEntity.getFirstName(),
+    public void updateEmployee(Employee employeeEntity) {
+        jdbcTemplate.update(UPDATE_EMPLOYEE_SQL,
+                employeeEntity.getFirstName(),
                 employeeEntity.getLastName(),
                 employeeEntity.getDepartmentId(),
                 employeeEntity.getJobTitle(),
-                employeeEntity.getGender(),
+                employeeEntity.getGender().name(),
                 employeeEntity.getDateOfBirth(),
                 employeeEntity.getEmployeeId());
     }
 
     @Override
-    public Optional<Employee> findById(int id) {
-        String findEmployeeById =
-                "SELECT * FROM employee WHERE employee_id = ?";
-        EmployeeEntity employeeEntity = jdbcTemplate.queryForObject(findEmployeeById, new EmployeeMapper(), id);
-
-        return Optional.of(new Employee(employeeEntity.getEmployeeId(), employeeEntity.getFirstName(), employeeEntity.getGender()));
+    public Optional<Employee> findById (long id) {
+        Employee employee = jdbcTemplate.queryForObject(FIND_EMPLOYEE_BY_ID_SQL, new EmployeeMapper(), id);
+        return Optional.ofNullable(employee);
     }
 }

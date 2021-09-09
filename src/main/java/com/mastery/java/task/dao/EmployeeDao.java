@@ -1,19 +1,18 @@
 package com.mastery.java.task.dao;
 
-import com.mastery.java.task.config.entity.EmployeeEntity;
 import com.mastery.java.task.dto.Employee;
 
 import java.util.List;
 import java.util.Optional;
 
 public interface EmployeeDao {
-    List<EmployeeEntity> findAll();
+    List<Employee> findAll();
 
-    EmployeeEntity addEmployee(EmployeeEntity employeeEntity);
+    Employee addEmployee(Employee employee);
 
-    void deleteEmployee(int id);
+    void deleteEmployee(long id);
 
-    void updateInfoAboutEmployee(EmployeeEntity employeeEntity);
+    void updateEmployee(Employee employee);
 
-    Optional<Employee> findById(int id);
+    Optional<Employee> findById(long id);
 }

@@ -1,4 +1,4 @@
-package com.mastery.java.task.config.entity;
+package com.mastery.java.task.dto;
 
 public enum Gender {
     MALE,

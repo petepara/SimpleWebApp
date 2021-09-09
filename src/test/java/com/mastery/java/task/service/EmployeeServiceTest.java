@@ -1,17 +1,15 @@
 package com.mastery.java.task.service;
 
-
-import com.mastery.java.task.config.entity.EmployeeEntity;
-import com.mastery.java.task.config.entity.Gender;
+import com.mastery.java.task.dto.Gender;
 import com.mastery.java.task.dao.EmployeeDao;
 import com.mastery.java.task.dto.Employee;
-import com.mastery.java.task.service.impl.EmployeeServiceImpl;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-import org.mockito.Mockito;
-
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 
 import java.time.LocalDate;
 import java.util.Arrays;
@@ -21,18 +19,24 @@ import java.util.Optional;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doReturn;
 
+@SpringBootTest
 public class EmployeeServiceTest {
-
-    private final EmployeeDao employeeDao= Mockito.mock(EmployeeDao.class);
-
-    private EmployeeService employeeService = new EmployeeServiceImpl(employeeDao) {
-    };
+    @MockBean
+    private EmployeeDao employeeDao;
+    @Autowired
+    private EmployeeService employeeService;
 
     @Test
     @DisplayName("Test findById Success")
     void testFindById() {
         // Setup our mock repository
-        Employee employee = new Employee(1, "Zhir", Gender.MALE);
+        Employee employee = new Employee(1L,
+                "Soso",
+                "Assa",
+                14,
+                "manager",
+                Gender.FEMALE,
+                LocalDate.of(1941, 5, 30));
         doReturn(Optional.of(employee)).when(employeeDao).findById(1);
 
         // Execute the service call
@@ -60,20 +64,20 @@ public class EmployeeServiceTest {
     @DisplayName("Test findAll")
     void testFindAll() {
         // Setup our mock repository
-        EmployeeEntity employee1 = new EmployeeEntity(8,
+        Employee employee1 = new Employee(8L,
                 "Kira",
                 "Arik",
                 15,
                 "DJ",
                 Gender.FEMALE,
                 LocalDate.of(1941, 5, 30));
-        EmployeeEntity employee2 = new EmployeeEntity(9,
+        Employee employee2 = new Employee(9L,
                 "Soso",
                 "Assa",
                 14,
                 "manager",
                 Gender.FEMALE,
-                LocalDate.of(1941, 05, 30));
+                LocalDate.of(1941, 5, 30));
         doReturn(Arrays.asList(employee1, employee2)).when(employeeDao).findAll();
 
         // Execute the service call
@@ -82,25 +86,27 @@ public class EmployeeServiceTest {
         // Assert the response
         Assertions.assertEquals(2, employees.size(), "findAll should return 2 employee");
     }
-        @Test
-        @DisplayName("Test save employee")
-        void testAdd() {
-            // Setup our mock repository
-            EmployeeEntity employee = new EmployeeEntity(2,
-                    "Soso",
-                    "Assa",
-                    14,
-                    "manager",
-                    Gender.FEMALE,
-                    LocalDate.of(1941, 05, 30));
-            doReturn(employee).when(employeeDao).addEmployee(any());
 
-            // Execute the service call
-            EmployeeEntity returnedEmployee = employeeService.addEmployee(employee);
+    @Test
+    @DisplayName("Test save employee")
+    void testAdd() {
+        // Setup our mock repository
+        Employee employee = new Employee(2L,
+                "Soso",
+                "Assa",
+                14,
+                "manager",
+                Gender.FEMALE,
+                LocalDate.of(1979, 12, 31));
+        doReturn(employee).when(employeeDao).addEmployee(any());
 
-            // Assert the response
-            Assertions.assertNotNull(returnedEmployee, "The added employee should not be null");
-            Assertions.assertEquals(2, returnedEmployee.getEmployeeId(), "ID should be incremented");
-        }
+        // Execute the service call
+        Employee returnedEmployee = employeeService.addEmployee(employee);
+
+        // Assert the response
+        Assertions.assertNotNull(returnedEmployee, "The added employee should not be null");
+        Assertions.assertEquals(2, returnedEmployee.getEmployeeId(), "ID should be incremented");
     }
+
+}
 

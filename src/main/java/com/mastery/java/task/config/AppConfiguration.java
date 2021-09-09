@@ -1,24 +1,34 @@
 package com.mastery.java.task.config;
 
-import org.springframework.web.servlet.support.AbstractAnnotationConfigDispatcherServletInitializer;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.core.env.Environment;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.datasource.DriverManagerDataSource;
 
-public class AppConfiguration extends AbstractAnnotationConfigDispatcherServletInitializer {
+import javax.sql.DataSource;
 
-    @Override
-    protected Class<?>[] getRootConfigClasses() {
-        return null;
+@Configuration
+public class AppConfiguration {
+
+    @Autowired
+    private Environment environment;
+
+    @Bean
+    public DataSource dataSource() {
+        DriverManagerDataSource dataSource = new DriverManagerDataSource();
+
+        dataSource.setDriverClassName(environment.getProperty("jdbc.driverClassName"));
+        dataSource.setUrl(environment.getProperty("jdbc.url"));
+        dataSource.setUsername(environment.getProperty("jdbc.username"));
+        dataSource.setPassword(environment.getProperty("jdbc.password"));
+
+        return dataSource;
     }
 
-    //getServletConfigClasses() configures the dispatcher servlet and transfers the handler to dispatcher servlet java file WebConfig.class.
-    // WebConfig.java file is used in place of dispatcher servlet for java based configuration.
-    @Override
-    protected Class<?>[] getServletConfigClasses() {
-        return new Class[]{WebConfig.class};
-    }
-
-    // getServletMappings() function receive all the requests corresponding to the ‘/ ’ URL mapping.
-    @Override
-    protected String[] getServletMappings() {
-        return new String[]{"/"};
+    @Bean
+    public JdbcTemplate getJdbcTemplate() {
+        return new JdbcTemplate(dataSource());
     }
 }

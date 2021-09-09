@@ -1,6 +1,5 @@
 package com.mastery.java.task.service.impl;
 
-import com.mastery.java.task.config.entity.EmployeeEntity;
 import com.mastery.java.task.dao.EmployeeDao;
 import com.mastery.java.task.dto.Employee;
 import com.mastery.java.task.service.EmployeeService;
@@ -9,8 +8,6 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
-
-import static java.util.stream.Collectors.*;
 
 @Service
 public class EmployeeServiceImpl implements EmployeeService {
@@ -24,29 +21,34 @@ public class EmployeeServiceImpl implements EmployeeService {
 
     @Override
     public List<Employee> findAll() {
-        return employeeDao.findAll()
-                .stream()
-                .map(employeeEntity -> new Employee(employeeEntity.getEmployeeId(), employeeEntity.getFirstName(), employeeEntity.getGender()))
-                .collect(toList());
+        return employeeDao.findAll();
     }
 
     @Override
-    public EmployeeEntity addEmployee(EmployeeEntity employeeEntity) {
-        return employeeDao.addEmployee(employeeEntity);
+    public Employee addEmployee(Employee employee) {
+        return employeeDao.addEmployee(employee);
     }
 
     @Override
-    public void deleteEmployee(int id) {
+    public void deleteEmployee(long id) {
         employeeDao.deleteEmployee(id);
     }
 
     @Override
-    public void updateInfoAboutEmployee(EmployeeEntity employeeEntity) {
-        employeeDao.updateInfoAboutEmployee(employeeEntity);
+    public Employee updateInfoAboutEmployee(Employee employee) {
+        Employee existingEmployee = employeeDao.findById(employee.getEmployeeId()).get();
+        existingEmployee.setFirstName(employee.getFirstName());
+        existingEmployee.setLastName(employee.getLastName());
+        existingEmployee.setDepartmentId(employee.getDepartmentId());
+        existingEmployee.setJobTitle(employee.getJobTitle());
+        existingEmployee.setGender(employee.getGender());
+        existingEmployee.setDateOfBirth(employee.getDateOfBirth());
+        employeeDao.updateEmployee(existingEmployee);
+        return existingEmployee;
     }
 
     @Override
-    public Optional<Employee> findById(int id) {
+    public Optional<Employee> findById(long id) {
         if (employeeDao.findById(id).isPresent()) {
             return Optional.of(employeeDao.findById(id).get());
         }

@@ -1,14 +1,12 @@
 package com.mastery.java.task.rest;
 
-import com.mastery.java.task.config.entity.EmployeeEntity;
-import com.mastery.java.task.config.entity.Gender;
+import com.mastery.java.task.dto.Gender;
 import com.mastery.java.task.dto.Employee;
 import com.mastery.java.task.service.EmployeeService;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
-import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
@@ -27,29 +25,19 @@ public class EmployeeController {
     }
 
     @GetMapping("/employee/{id}")
-    public Optional<Employee> getById(@PathVariable("id") int id) {
+    public Optional<Employee> getById(@PathVariable("id") long id) {
         return employeeService.findById(id);
     }
 
-    ;
-
     @PostMapping("/newEmployee")
-    public Employee addNewEmployee(@RequestParam String firstName,
-                                   @RequestParam String lastName,
-                                   @RequestParam Integer departId,
-                                   @RequestParam String jobTitle,
-                                   @RequestParam String gender,
-                                   @RequestParam  @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate birthday) {
-        EmployeeEntity employeeEntity = new EmployeeEntity(firstName,
-                lastName,
-                departId,
-                jobTitle,
-                Gender.valueOf(gender),
-                birthday);
-        employeeService.addEmployee(employeeEntity);
-        return new Employee(employeeEntity.getEmployeeId(), employeeEntity.getFirstName(), employeeEntity.getGender());
+    public Employee addNewEmployee(@RequestBody Employee employee){
+        return employeeService.addEmployee(employee);
     }
 
+    @PutMapping("/updateEmployee")
+    public Employee replaceEmployee(@RequestBody Employee newEmployee) {
+        return employeeService.updateInfoAboutEmployee(newEmployee);
+    }
     @GetMapping("/deleteEmployee/{id}")
     public List<Employee> deleteEmployee(@PathVariable("id") int id) {
         employeeService.deleteEmployee(id);
